@@ -1,1 +1,1 @@
-GenericApi
+Asp.net Core 6 RESTful api server , implementation of JWT Authentication and Authorization in .NET 6.0 with Identity and entityFramework  plus base logic in Generic classes and controllers, create register users manage claims issures of JWT and referesh tokens.
