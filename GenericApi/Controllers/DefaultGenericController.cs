@@ -1,5 +1,5 @@
 ﻿using GenericApi.Services;
-using GenericApi.Extensions;
+using GenericApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

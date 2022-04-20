@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-namespace GenericApi.Extensions
+namespace GenericApi.Helpers
 {
     public static class ModelStateExt
     {

@@ -1,15 +1,14 @@
-﻿using GenericApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-namespace GenericApi.Extensions
+namespace GenericApi.Jwt
 {
-    public static class AddJWTTokenServicesExt
+    public static class JWTTokenServices
     {
         public static void AddJWTTokenServices(this IServiceCollection Services, IConfiguration Configuration)
         {
-            // Add Jwt Setings
-            var bindJwtSettings = new JwtSettings();
+            // Add JwtSetings
+            IJwtSettings bindJwtSettings = new JwtSettings();
             Configuration.Bind("JWT", bindJwtSettings);
             Services.AddSingleton(bindJwtSettings);
 
@@ -18,7 +17,8 @@ namespace GenericApi.Extensions
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            }).AddJwtBearer(options => {
+            })
+            .AddJwtBearer(options => {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters()

@@ -2,7 +2,7 @@ using GenericApi;
 using GenericApi.Data;
 using GenericApi.Services;
 using Microsoft.EntityFrameworkCore;
-using GenericApi.Extensions;
+using GenericApi.Jwt;
 using Microsoft.OpenApi.Models;
 using GenericApi.Models;
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +19,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// add JWT and authntication scheme
+// add JwtSetings and AddAuthentication and AddJwtBearer
 builder.Services.AddJWTTokenServices(builder.Configuration);
 
 // Add services to the container.

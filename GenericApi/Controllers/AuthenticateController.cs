@@ -7,7 +7,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using GenericApi.Models;
-using GenericApi.Extensions;
+using GenericApi.Helpers;
+using System.Reflection;
+using GenericApi.Jwt;
 
 namespace GenericApi.Controllers
 {
@@ -17,15 +19,21 @@ namespace GenericApi.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly JwtSettings jwtSettings;
+        private readonly IJwtSettings _jwtSettings;
+        private readonly ILogger _logger;
         public AuthenticateController(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            JwtSettings jwtSettings)
+            IJwtSettings jwtSettings,
+            ILogger<AuthenticateController> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            this.jwtSettings = jwtSettings;
+            _jwtSettings = jwtSettings;
+            _logger = logger;
+
+            // test print jwt setting values
+            LogObjectPropertyValues(jwtSettings);
         }
 
         [HttpPost]
@@ -45,9 +53,9 @@ namespace GenericApi.Controllers
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Email, user.Email),
+                    //new Claim(ClaimTypes.Email, user.Email),
                     //new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddDays(jwtSettings.RefreshTokenValidityInDays).ToString("MMM ddd dd yyyy HH:mm:ss tt"))
+                    new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenValidityInDays).ToString("MMM ddd dd yyyy HH:mm:ss tt"))
                 };
                 
                 foreach (var userRole in userRoles)
@@ -59,7 +67,7 @@ namespace GenericApi.Controllers
                 var refreshToken = GenerateRefreshToken();
 
                 user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiryTime = DateTime.Now.AddDays(jwtSettings.RefreshTokenValidityInDays);
+                user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_jwtSettings.RefreshTokenValidityInDays);
 
                 await _userManager.UpdateAsync(user);
 
@@ -206,12 +214,12 @@ namespace GenericApi.Controllers
 
         private JwtSecurityToken CreateToken(List<Claim> authClaims)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.IssuerSigningKey));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.IssuerSigningKey));
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings.ValidIssuer,
-                audience: jwtSettings.ValidAudience,
-                expires:  DateTime.Now.AddMinutes(jwtSettings.TokenValidityInMinutes),
+                issuer: _jwtSettings.ValidIssuer,
+                audience: _jwtSettings.ValidAudience,
+                expires:  DateTime.Now.AddMinutes(_jwtSettings.TokenValidityInMinutes),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
@@ -231,10 +239,10 @@ namespace GenericApi.Controllers
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ValidateAudience = jwtSettings.ValidateAudience,
-                ValidateIssuer = jwtSettings.ValidateIssuer,
-                ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.IssuerSigningKey)),
+                ValidateAudience = _jwtSettings.ValidateAudience,
+                ValidateIssuer = _jwtSettings.ValidateIssuer,
+                ValidateIssuerSigningKey = _jwtSettings.ValidateIssuerSigningKey,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.IssuerSigningKey)),
                 ValidateLifetime = false
             };
 
@@ -245,6 +253,19 @@ namespace GenericApi.Controllers
 
             return principal;
 
+        }
+
+        private  void LogObjectPropertyValues(object obj)
+        {
+            Type t = obj.GetType();
+            _logger.LogInformation($"Type is: {t.Name}");
+            PropertyInfo[] props = t.GetProperties();
+            _logger.LogInformation($"Properties (N = {props.Length}):");
+            foreach (var prop in props)
+                if (prop.GetIndexParameters().Length == 0)
+                    _logger.LogInformation($"{prop.Name} ({prop.PropertyType.Name}): {prop.GetValue(obj)}");
+                else
+                    _logger.LogInformation($"{prop.Name} ({prop.PropertyType.Name}): <Indexed>");
         }
     }
 }

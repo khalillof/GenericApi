@@ -7,7 +7,7 @@ namespace GenericApi
 {
     public class SeedData
     {
-        public static List<ApplicationUser> Users
+        private static List<ApplicationUser> Users
         {
             get
             {
@@ -45,34 +45,31 @@ namespace GenericApi
         }
         public static void EnsureSeedData(IServiceProvider services)
         {
-
-            using (var serviceProvider = services.CreateScope())
+            using var serviceProvider = services.CreateScope();
+            var context = serviceProvider.ServiceProvider.GetService<ApplicationDbContext>()!;
+            ILogger<SeedData> log = serviceProvider.ServiceProvider.GetService<ILogger<SeedData>>()!;
+            if (!context.AppUsers.Any())
             {
-                var context = serviceProvider.ServiceProvider.GetService<ApplicationDbContext>()!;
+                CreateUsers(context, log).ConfigureAwait(true);
+            }
 
-                     if(!context.AppUsers.Any())
-                     {
-                       CreateUsers(context).ConfigureAwait(true);
-                     }
+            if (!context.Customers.Any())
+            {
 
-                    if (!context.Customers.Any())
-                    {
-  
-                        foreach (var client in Customer.Customers)
-                        {
-                            context.Customers.Add(client);
-                        }
-                        context.SaveChanges();
-                    }
+                foreach (var client in Customer.Customers)
+                {
+                    context.Customers.Add(client);
+                    log.LogInformation($"Added cusomer : ( {client.First_name + client.Last_name} ) to database");
+                }
+                context.SaveChanges();
+                log.LogInformation("Done with Customers =======================================");
             }
         }
 
-        public static async Task CreateUsers(ApplicationDbContext context)
+        public static async Task CreateUsers(ApplicationDbContext context, ILogger log)
         {
-
             //roles
             string[] roles = new string[] { "Admin", "Owner", "User"};
-
 
             foreach (string role in roles)
             {
@@ -83,7 +80,7 @@ namespace GenericApi
                     {
 
                         await context.Roles.AddAsync(new IdentityRole() { Name = role, NormalizedName = role.ToUpper().Normalize() });
-
+                        log.LogInformation($"added Role : ( {role} ) - to database");
                     }
                     catch (Exception ex)
                     {
@@ -96,6 +93,7 @@ namespace GenericApi
 
             await context!.SaveChangesAsync();
 
+            log.LogInformation("Done with Roles =======================================");
 
             foreach (var user in Users)
             {
@@ -107,6 +105,7 @@ namespace GenericApi
                         // user
                         await context.AppUsers.AddAsync(user);
 
+                        log.LogInformation($"added User :( {user.UserName} ) - to database");
                         // User role
                         var _role = await context.Roles.FirstOrDefaultAsync(c => c.Name == "Admin");
                         if (_role != null && !context.UserRoles.Any(c => c.UserId == user.Id && c.RoleId == _role.Id))
@@ -116,6 +115,7 @@ namespace GenericApi
                             // add userRoleClaim
                             await context.RoleClaims.AddAsync(new IdentityRoleClaim<string>() { RoleId = _role.Id, ClaimType = _role.Name, ClaimValue = _role.Name });
 
+                            log.LogInformation($" added Role : ( {_role.Name} )- to User {user.UserName}");
                         }
                     }
                     catch (Exception ex)
@@ -127,6 +127,7 @@ namespace GenericApi
 
             await context!.SaveChangesAsync();
 
+            log.LogInformation("Done with Users =======================================");
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace GenericApi.Models
+﻿namespace GenericApi.Jwt
 {
-        public class JwtSettings
+    public class JwtSettings : IJwtSettings
         {
             public bool ValidateIssuerSigningKey { get; set; } = true;
             public string IssuerSigningKey { get; set; } = String.Empty;
