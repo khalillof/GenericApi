@@ -61,7 +61,8 @@ builder.Services.AddSwaggerGen(options => {
     });
 });
 // Add data services.
-builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+builder.Services.AddScoped(typeof(IRepositoryAsync<,>), typeof(RepositoryAsync<,>));
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
 builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 
 var app = builder.Build();

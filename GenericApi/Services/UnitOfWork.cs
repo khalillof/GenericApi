@@ -8,22 +8,38 @@ namespace GenericApi.Services
         private readonly IDictionary<Type, object> _store;
         public UnitOfWork(DbEntity contex)
         {
-            this._context = contex;
+            _context = contex;
             _store = new Dictionary<Type, object>();
         }
 
-        public IGenericRepository<DbEntity, TEntity> Repo<TEntity>() where TEntity : class
+        public IRepositoryAsync<DbEntity, TEntity> RepoAsync<TEntity>() where TEntity : class
         {
 
-            if (this._store.ContainsKey(typeof(TEntity)))
+            if (_store.ContainsKey(typeof(TEntity)))
             {
-                var _repo = this._store[typeof(TEntity)] as IGenericRepository<DbEntity, TEntity>;
+                var _repo = _store[typeof(TEntity)] as IRepositoryAsync<DbEntity, TEntity>;
                 return _repo!;
             }
             else
             {
-                var newRepo = new GenericRepository<DbEntity, TEntity>(_context);
-                this._store.Add(typeof(TEntity), newRepo);
+                var newRepo = new RepositoryAsync<DbEntity, TEntity>(_context);
+                _store.Add(typeof(TEntity), newRepo);
+                return newRepo;
+            }
+        }
+
+        public IRepository<DbEntity, TEntity> Repo<TEntity>() where TEntity : class
+        {
+
+            if (_store.ContainsKey(typeof(TEntity)))
+            {
+                var _repo = _store[typeof(TEntity)] as IRepository<DbEntity, TEntity>;
+                return _repo!;
+            }
+            else
+            {
+                var newRepo = new Repository<DbEntity, TEntity>(_context);
+                _store.Add(typeof(TEntity), newRepo);
                 return newRepo;
             }
         }
@@ -41,15 +57,15 @@ namespace GenericApi.Services
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
-                    this._store.Clear();
+                    _store.Clear();
                     _context.Dispose();
                 }
             }
-            this.disposed = true;
+            disposed = true;
         }
 
         public void Dispose()

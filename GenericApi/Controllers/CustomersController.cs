@@ -13,7 +13,7 @@ namespace GenericApi.Controllers
     [ApiController]
     public class CustomersController : DefaultGenericController<ApplicationDbContext, Customer, int>
     {
-        public CustomersController(IGenericRepository<ApplicationDbContext, Customer> repo) : base(repo) {}
+        public CustomersController(IRepositoryAsync<ApplicationDbContext, Customer> repo) : base(repo) {}
         // using unitOfWork
         // public CustomersController(IUnitOfWork<ApplicationDbContext> repo) : base(repo) {}
 

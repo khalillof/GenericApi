@@ -73,9 +73,9 @@ namespace GenericApi.Controllers
 
                 return Ok(new
                 {
-                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                    RefreshToken = refreshToken,
-                    Expiration = token.ValidTo
+                    accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                    refreshToken,
+                    expiresOn = token.ValidTo
                 });
             }
             return Unauthorized();

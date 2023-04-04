@@ -10,7 +10,7 @@
             public string? ValidAudience { get; set;}
             public bool RequireExpirationTime  { get; set; }
             public bool ValidateLifetime { get; set; } = true;
-            public int TokenValidityInMinutes { get; set; } = 1;
+            public int TokenValidityInMinutes { get; set; } = 60;
             public int RefreshTokenValidityInDays { get; set; } = 7;
         }
 }

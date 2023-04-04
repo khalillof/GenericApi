@@ -7,9 +7,12 @@ namespace GenericApi.Jwt
     {
         public static void AddJWTTokenServices(this IServiceCollection Services, IConfiguration Configuration)
         {
+
             // Add JwtSetings
-            IJwtSettings bindJwtSettings = new JwtSettings();
-            Configuration.Bind("JWT", bindJwtSettings);
+            IJwtSettings bindJwtSettings = Configuration.GetSection("JWT").Get<JwtSettings>()!;
+
+            //IJwtSettings bindJwtSettings = new JwtSettings();
+            //Configuration.Bind("JWT", bindJwtSettings);
             Services.AddSingleton(bindJwtSettings);
 
             Services.AddAuthentication(options => {

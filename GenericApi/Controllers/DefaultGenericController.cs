@@ -11,12 +11,12 @@ namespace GenericApi.Controllers
    public abstract  class DefaultGenericController<DbEntity, TEntity, TKey> : ControllerBase where DbEntity : DbContext where TEntity : class where TKey : notnull
     {
         
-        private readonly IGenericRepository<DbEntity,TEntity> db;
-        public DefaultGenericController(IGenericRepository<DbEntity,TEntity> context)=>  db = context;
+        private readonly IRepositoryAsync<DbEntity,TEntity> db;
+        public DefaultGenericController(IRepositoryAsync<DbEntity,TEntity> context)=>  db = context;
         
         
         // UnitOfWork
-        // public GenericController(IUnitOfWork<DbEntity> context)=> db = context.Repo<TEntity>();
+      //   public DefaultGenericController(IUnitOfWork<DbEntity> context)=> db = context.RepoAsync<TEntity>();
         
         // GET: api/Generic
         [HttpGet]
@@ -32,7 +32,7 @@ namespace GenericApi.Controllers
         {
             if(id == null)  return NotFound();
 
-            var item = await db.GetByIdAsync(id);
+            var item = await db.FindByIdAsync(id);
 
             if (item == null)
             {
@@ -66,7 +66,7 @@ namespace GenericApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                var obj = await db.GetByIdAsync(id);
+                var obj = await db.FindByIdAsync(id);
                 if (obj == null)
                 {
                     return NotFound();
@@ -90,7 +90,7 @@ namespace GenericApi.Controllers
                 return BadRequest(ModelState.ErrorMessages());
             }
             
-            await db.InsertAsync(item);
+            await db.AddAsync(item);
             await db.SaveChangesAsync();
 
             dynamic ItemBox = item;
@@ -103,7 +103,7 @@ namespace GenericApi.Controllers
         {
             if(id == null)  return BadRequest();    
 
-            var item = await db.GetByIdAsync(id);
+            var item = await db.FindByIdAsync(id);
             if (item == null)
             {
                 return NotFound();

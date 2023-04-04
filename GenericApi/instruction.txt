@@ -1,0 +1,2 @@
+﻿
+https://docs.microsoft.com/en-us/aspnet/core/security/authentication/certauth?view=aspnetcore-6.0
