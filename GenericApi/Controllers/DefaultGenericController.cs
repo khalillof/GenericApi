@@ -12,11 +12,12 @@ namespace GenericApi.Controllers
     {
         
         private readonly IRepositoryAsync<DbEntity,TEntity> db;
-        public DefaultGenericController(IRepositoryAsync<DbEntity,TEntity> context)=>  db = context;
+        //private readonly IUnitOfWork<DbEntity> db;
+       public DefaultGenericController(IRepositoryAsync<DbEntity,TEntity> repo)=>  db = repo;
         
         
         // UnitOfWork
-      //   public DefaultGenericController(IUnitOfWork<DbEntity> context)=> db = context.RepoAsync<TEntity>();
+         //public DefaultGenericController(IUnitOfWork<DbEntity> repo)=> db = repo;
         
         // GET: api/Generic
         [HttpGet]
